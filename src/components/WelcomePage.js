@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, BackHandler } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const WelcomePage = ({ navigation }) => {
+const WelcomePage = () => {
+  const navigation = useNavigation();
   const [isWelcomeMessageVisible, setWelcomeMessageVisible] = useState(true);
 
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-
-    return () => {
-      backHandler.remove();
-    };
-  }, []);
+  const handleButtonClick = () => {
+    // Utilisez navigation pour naviguer vers la prochaine page
+    navigation.navigate('NextPage');
+  };
 
   const handleBackPress = () => {
     if (isWelcomeMessageVisible) {
@@ -30,10 +29,12 @@ const WelcomePage = ({ navigation }) => {
   };
 
   const handleLogin = () => {
+    // Utilisez navigation pour naviguer vers la page de connexion
     navigation.navigate('LoginForm');
   };
 
   const handleSignUp = () => {
+    // Utilisez navigation pour naviguer vers la page d'inscription
     navigation.navigate('SignUpForm');
   };
 

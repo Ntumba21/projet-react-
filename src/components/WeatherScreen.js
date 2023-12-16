@@ -1,8 +1,12 @@
 // WeatherScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Alert } from 'react-native';
+import { View, Text, FlatList, Alert, Image } from 'react-native';
 import axios from 'axios';
 import * as Location from 'expo-location';
+
+const getWeatherIconUrl = (iconCode) => {
+  return `https://openweathermap.org/img/w/${iconCode}.png`;
+};
 
 const WeatherScreen = () => {
   const [weatherData, setWeatherData] = useState(null);
@@ -48,15 +52,20 @@ const WeatherScreen = () => {
 
   return (
     <View>
-      {weatherData ? (
-        <View>
-          <Text>Location: {weatherData.name}</Text>
-          <Text>Temperature: {kelvinToCelsius(weatherData.main.temp).toFixed(2)} °C</Text>
-          <Text>Weather: {weatherData.weather[0].description}</Text>
-        </View>
-      ) : (
-        <Text>Chargement des données météorologiques...</Text>
-      )}
+    {weatherData ? (
+      <View>
+        <Text>Location: {weatherData.name}</Text>
+        <Image 
+          source={{ uri: getWeatherIconUrl(weatherData.weather[0].icon) }}
+          style={{ width: 100, height: 100 }}  
+        />
+        <Text>Temperature: {kelvinToCelsius(weatherData.main.temp).toFixed(2)} °C</Text>
+        <Text>Weather: {weatherData.weather[0].description}</Text>
+      </View>
+    ) : (
+      <Text>Chargement des données météorologiques...</Text>
+    )}
+
 
       {forecastData ? (
         <View>
