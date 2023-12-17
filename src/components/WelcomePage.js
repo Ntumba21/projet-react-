@@ -1,31 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, BackHandler } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const WelcomePage = () => {
-  const navigation = useNavigation();
   const [isWelcomeMessageVisible, setWelcomeMessageVisible] = useState(true);
+  const navigation = useNavigation();
 
   const handleButtonClick = () => {
     // Utilisez navigation pour naviguer vers la prochaine page
     navigation.navigate('NextPage');
-  };
-
-  const handleBackPress = () => {
-    if (isWelcomeMessageVisible) {
-      // Si le message de bienvenue est visible, masquer le message
-      setWelcomeMessageVisible(false);
-    } else {
-      // Sinon, quitter l'application
-      handleExit();
-    }
-
-    // Indiquer que le gestionnaire d'événements a été traité
-    return true;
-  };
-
-  const hideWelcomeMessage = () => {
-    setWelcomeMessageVisible(false);
   };
 
   const handleLogin = () => {
@@ -43,7 +26,6 @@ const WelcomePage = () => {
     console.log("Quitter l'application");
     // Notez que cette méthode est utilisée pour l'exemple, vous pouvez utiliser des bibliothèques de gestion de navigation pour une meilleure expérience utilisateur.
     // Par exemple, vous pourriez utiliser react-navigation et sa fonction popToTop pour retourner à l'écran d'accueil.
-    BackHandler.exitApp(); // Cette ligne quitte l'application réellement
   };
 
   return (

@@ -1,5 +1,5 @@
-//LoginForm.js
-import React, { useState } from "react";
+// LoginForm.js
+import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import {
   StyleSheet,
@@ -10,10 +10,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-} from "react-native";
-import { styles } from "./styles/LoginStyle"; // Assurez-vous d'importer correctement le fichier de styles
+} from 'react-native';
+import { styles } from './styles/LoginStyle';
 import firebase from '../firebase';
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+
 export default function LoginForm() {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
@@ -73,18 +74,18 @@ export default function LoginForm() {
   return (
     <View style={styles.container}>
       <Image
-        source={require("../../assets/Login.png")}
+        // source={require("../../assets/Login.png")}
         style={styles.backgroundImage}
       />
       <Text style={styles.header}>Connexion</Text>
-      <Text style={styles.subHeader}>Connectez-vous à votre compte</Text>
+      <Text style={styles.subHeader}>Créer votre compte MéteoSama</Text>
 
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Email"
           keyboardType="email-address"
-          placeholderTextColor="#ffffff"
+          placeholderTextColor="#8888"
           onChangeText={setEmail}
           onBlur={validateEmail}
           value={email}
@@ -97,7 +98,7 @@ export default function LoginForm() {
           style={styles.input}
           placeholder="Mot de passe"
           secureTextEntry
-          placeholderTextColor="#ffffff"
+          placeholderTextColor="#8888"
           onChangeText={setPassword}
           onBlur={validatePassword}
           value={password}

@@ -4,7 +4,7 @@ import { styles } from './styles/SignupStyle';
 import { useNavigation } from '@react-navigation/native';
 import firebaseInstance from '../firebase';
 
-const { auth, createUserWithEmailAndPassword, sendEmailVerification } = firebaseInstance;
+const { auth, createUserWithEmailAndPassword } = firebaseInstance;
 
 const SignUpForm = () => {
   const navigation = useNavigation();
@@ -18,22 +18,27 @@ const SignUpForm = () => {
     console.log('RegisterUser function called');
     if (!email || !password || !agree) {
       setError('Please fill all fields and agree to the terms.');
+      console.log('Error:', 'Please fill all fields and agree to the terms.');
       return;
     }
 
     setLoading(true);
 
     try {
+      console.log('Before registration');
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await sendEmailVerification(userCredential.user);
+      console.log('After registration');
 
-      // Rediriger vers l'écran de connexion après une inscription réussie
-      navigation.navigate('LoginForm'); // Remplacez 'Login' par le nom de votre écran de connexion
+      console.log('Before navigation');
+      Alert.alert('Account created!', 'Please check your email for further instructions.', [
+        { text: 'OK', onPress: () => navigation.replace('WelcomePage') },
+      ]);
+      console.log('After navigation');
 
-      Alert.alert('Verification email sent!', 'Please check your email to verify your account.');
       setLoading(false);
     } catch (signupError) {
       setError(signupError.message);
+      console.log('Signup Error:', signupError.message);
       setLoading(false);
     }
   };
