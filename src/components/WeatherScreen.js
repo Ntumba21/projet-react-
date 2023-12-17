@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Alert, ImageBackground, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Alert, ImageBackground, StyleSheet, TextInput } from 'react-native';
 import axios from 'axios';
 import * as Location from 'expo-location';
 import { Image } from 'react-native';
@@ -11,6 +11,7 @@ const getWeatherIconUrl = (iconCode) => {
 const WeatherScreen = () => {
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const getLocationAndWeather = async () => {
@@ -21,25 +22,40 @@ const WeatherScreen = () => {
           return;
         }
 
-        const location = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = location.coords;
+        let location;
+        if (searchTerm) {
+          // Si searchTerm est défini, recherche par ville
+          const apiKey = "98b22d048fd53b33cb283d123eeece15";
+          const cityWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${searchTerm}&appid=${apiKey}`;
 
-        const apiKey = "98b22d048fd53b33cb283d123eeece15";
-        const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
+          const cityWeatherResponse = await axios.get(cityWeatherUrl);
+          setWeatherData(cityWeatherResponse.data);
 
-        const currentWeatherResponse = await axios.get(currentWeatherUrl);
-        setWeatherData(currentWeatherResponse.data);
+          const cityForecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${searchTerm}&appid=${apiKey}`;
+          const cityForecastResponse = await axios.get(cityForecastUrl);
+          setForecastData(cityForecastResponse.data);
+        } else {
+          // Sinon, utilise la localisation actuelle
+          location = await Location.getCurrentPositionAsync({});
+          const { latitude, longitude } = location.coords;
 
-        const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
-        const forecastResponse = await axios.get(forecastUrl);
-        setForecastData(forecastResponse.data);
+          const apiKey = "98b22d048fd53b33cb283d123eeece15";
+          const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
+
+          const currentWeatherResponse = await axios.get(currentWeatherUrl);
+          setWeatherData(currentWeatherResponse.data);
+
+          const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
+          const forecastResponse = await axios.get(forecastUrl);
+          setForecastData(forecastResponse.data);
+        }
       } catch (error) {
         console.error('Error getting location or weather data', error);
       }
     };
 
     getLocationAndWeather();
-  }, []);
+  }, [searchTerm]); // Déclenche la recherche à chaque modification de searchTerm
 
   const kelvinToCelsius = (kelvin) => {
     return kelvin - 273.15;
@@ -56,11 +72,12 @@ const WeatherScreen = () => {
       '04d': 'https://postimg.cc/GTdBmppD',
       '04n': 'https://postimg.cc/dZ6hkK7x',
     };
-  
+
     const keys = Object.keys(backgroundImageUrls);
     const randomKey = keys[Math.floor(Math.random() * keys.length)];
     return backgroundImageUrls[randomKey];
   };
+
   const backgroundStyle = {
     flex: 1,
     resizeMode: 'cover',
@@ -68,55 +85,63 @@ const WeatherScreen = () => {
     alignItems: 'center',
   };
 
-    return (
-<ImageBackground
-  source={{ uri: weatherData?.weather[0]?.icon && getBackgroundImage(weatherData.weather[0].icon) }}
-  style={backgroundStyle}
->
-  <View style={styles.container}>
-    {weatherData ? (
-      <View style={styles.weatherContainer}>
-        <Text style={styles.locationText}>Location: {weatherData.name}</Text>
-        <Image 
-          source={{ uri: getWeatherIconUrl(weatherData.weather[0].icon) }}
-          style={styles.weatherIcon}
+  return (
+    <ImageBackground
+      source={{ uri: weatherData?.weather[0]?.icon && getBackgroundImage(weatherData.weather[0].icon) }}
+      style={backgroundStyle}
+    >
+      <View style={styles.container}>
+        {/* Barre de recherche */}
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Rechercher une ville..."
+          value={searchTerm}
+          onChangeText={(text) => setSearchTerm(text)}
         />
-        <Text 
-        style={styles.temperatureText}
-        style={styles.temperatureTextContainer}                         >
-          Temperature: {parseInt(kelvinToCelsius(weatherData.main.temp))} °C
-        </Text>
-        <Text style={styles.weatherDescriptionText}>
-          Weather: {weatherData.weather[0].description}
-        </Text>
-      </View>
-    ) : (
-      <Text style={styles.loadingText}>Chargement des données météorologiques...</Text>
-    )}
 
-    {forecastData ? (
-      <ScrollView
-        horizontal
-        contentContainerStyle={styles.forecastContainer}
-      >
-        {forecastData.list.map((item) => (
-          <View key={item.dt} style={styles.forecastItem}>
-            <Text>Date/Heure: {new Date(item.dt * 1000).toLocaleString()}</Text>
-            <Text>Temperature: {parseInt(kelvinToCelsius(item.main.temp))} °C</Text>
-            <Text>Weather: {item.weather[0].description}</Text>
-            <Image
-              source={{ uri: getWeatherIconUrl(item.weather[0].icon) }}
-              style={styles.forecastIcon}
-            />
-            <Text style={styles.dividerText}> </Text>
-          </View>
-        ))}
-      </ScrollView>
-    ) : (
-      <Text style={styles.loadingText}>Chargement des prévisions météorologiques...</Text>
-    )}
-  </View>
-</ImageBackground>
+        <View style={styles.middleContent}>
+          {weatherData ? (
+            <View style={styles.weatherContainer}>
+              <Text style={styles.locationText}>Location: {weatherData.name}</Text>
+              <Image
+                source={{ uri: getWeatherIconUrl(weatherData.weather[0].icon) }}
+                style={styles.weatherIcon}
+              />
+              <Text style={styles.temperatureTextContainer}>
+                Temperature: {parseInt(kelvinToCelsius(weatherData.main.temp))} °C
+              </Text>
+              <Text style={styles.weatherDescriptionText}>
+                Weather: {weatherData.weather[0].description}
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.loadingText}>Chargement des données météorologiques...</Text>
+          )}
+
+          {forecastData ? (
+            <ScrollView
+              horizontal
+              contentContainerStyle={styles.forecastContainer}
+            >
+              {forecastData.list.map((item) => (
+                <View key={item.dt} style={styles.forecastItem}>
+                  <Text>Date/Heure: {new Date(item.dt * 1000).toLocaleString()}</Text>
+                  <Text>Temperature: {parseInt(kelvinToCelsius(item.main.temp))} °C</Text>
+                  <Text>Weather: {item.weather[0].description}</Text>
+                  <Image
+                    source={{ uri: getWeatherIconUrl(item.weather[0].icon) }}
+                    style={styles.forecastIcon}
+                  />
+                  <Text style={styles.dividerText}> </Text>
+                </View>
+              ))}
+            </ScrollView>
+          ) : (
+            <Text style={styles.loadingText}>Chargement des prévisions météorologiques...</Text>
+          )}
+        </View>
+      </View>
+    </ImageBackground>
   );
 };
 
@@ -126,6 +151,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 50,
+  },
+  middleContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   weatherContainer: {
     alignItems: 'center',
@@ -142,18 +172,16 @@ const styles = StyleSheet.create({
   },
   temperatureTextContainer: {
     borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Adjust the color and opacity as needed
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     padding: 15,
     marginBottom: 10,
   },
-  
   temperatureText: {
     fontSize: 24,
   },
-  
   weatherDescriptionText: {
     fontSize: 16,
-    fontWeigth: 'bold', 
+    fontWeight: 'bold',
   },
   forecastHeaderText: {
     fontSize: 18,
@@ -161,7 +189,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   forecastItem: {
-    marginBottom : 50,
+    marginBottom: 50,
     marginRight: 50,
     marginVertical: 50,
   },
@@ -180,8 +208,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'italic',
   },
-  
+  searchInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
 });
-
 
 export default WeatherScreen;
