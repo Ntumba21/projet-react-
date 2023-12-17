@@ -209,6 +209,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   searchInput: {
+    marginTop: 10,
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
